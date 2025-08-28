@@ -25,6 +25,8 @@ public:
     void beginDHT(uint8_t pin, uint8_t type);
     void beginMux(uint8_t a, uint8_t b, uint8_t c, uint8_t analogPin);
     void addPlant(const PlantConfig& config);
+    void setTemperatureTopic(const char* topic);
+    void setHumidityTopic(const char* topic);
     void connect();
     void loop();
     void readAndPublish();
@@ -54,4 +56,8 @@ private:
     // Running averages
     float tempSum = 0; int tempCount = 0;
     float humSum = 0; int humCount = 0;
+
+    // MQTT topic configuration
+    const char* temperatureTopic = "sensor/temperature";
+    const char* humidityTopic = "sensor/humidity";
 };

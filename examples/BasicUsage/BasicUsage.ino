@@ -10,6 +10,10 @@ void setup() {
 
     // Optionally setup the DHT device for temperature and moisture readings
     monitor.beginDHT(D4, DHT22);
+    // Configure MQTT topics for temperature and humidity (optional - defaults shown)
+    monitor.setTemperatureTopic("sensor/temperature/bookshelf");
+    monitor.setHumidityTopic("sensor/humidity/bookshelf");
+    
     // Setup the multiplexer to read analogue signals from moisture sensors.
     // The first three inputs are the digital pins connecting to the multiplexer chip
     // while the last is the analogue pin. 

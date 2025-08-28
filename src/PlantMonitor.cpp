@@ -22,6 +22,14 @@ void PlantMonitor::addPlant(const PlantConfig& config) {
     plants.push_back(config);
 }
 
+void PlantMonitor::setTemperatureTopic(const char* topic) {
+    temperatureTopic = topic;
+}
+
+void PlantMonitor::setHumidityTopic(const char* topic) {
+    humidityTopic = topic;
+}
+
 void PlantMonitor::connect() {
     WiFi.begin(ssid, password);
     Serial.print("Connecting to WiFi");
@@ -65,11 +73,11 @@ void PlantMonitor::readAndPublish() {
     // Publish schedule
     if (intervalCounter % 10 == 0) {
         if (tempCount > 0) {
-            publishData("sensor/temperature", tempSum / tempCount, "F");
+            publishData(temperatureTopic, tempSum / tempCount, "F");
             tempSum = 0; tempCount = 0;
         }
         if (humCount > 0) {
-            publishData("sensor/humidity", humSum / humCount, "%");
+            publishData(humidityTopic, humSum / humCount, "%");
             humSum = 0; humCount = 0;
         }
     }
@@ -95,14 +103,26 @@ void PlantMonitor::changeMux(int c, int b, int a) {
 }
 
 float PlantMonitor::readMoisture(int muxChannel, float rawMin, float rawMax) {
-    int select[8][3] = {
-        {LOW, LOW, LOW}, {LOW, LOW, HIGH}, {LOW, HIGH, LOW}, {LOW, HIGH, HIGH},
-        {HIGH, LOW, LOW}, {HIGH, LOW, HIGH}, {HIGH, HIGH, LOW}, {HIGH, HIGH, HIGH}
-    };
-    changeMux(select[muxChannel][2], select[muxChannel][1], select[muxChannel][0]);
-    delay(10);
-    int raw = analogRead(analogInput);
-    return map(raw, rawMin, rawMax, 0, 100);
+    // Set the MUX to the desired channel
+    switch(muxChannel) {
+        case 0: changeMux(LOW, LOW, LOW); break;  // Channel 0: 000
+        case 1: changeMux(LOW, LOW, HIGH); break; // Channel 1: 001
+        case 2: changeMux(LOW, HIGH, LOW); break; // Channel 2: 010
+        case 3: changeMux(LOW, HIGH, HIGH); break; // Channel 3: 011
+        case 4: changeMux(HIGH, LOW, LOW); break; // Channel 4: 100
+        case 5: changeMux(HIGH, LOW, HIGH); break; // Channel 5: 101
+        case 6: changeMux(HIGH, HIGH, LOW); break; // Channel 6: 110
+        case 7: changeMux(HIGH, HIGH, HIGH); break; // Channel 7: 111
+        default: changeMux(LOW, LOW, LOW); break;  // Default
+    }
+    delay(10); // time to settle
+
+    // read and convert 
+    int rawValue = analogRead(analogInput);
+    float moisturePercent = map(rawValue, rawMin, rawMax, 0, 100);
+    // could constrain the value to 0-100, but want to see if not well calibrated  
+
+    return moisturePercent;
 }
 
 float PlantMonitor::celsiusToFahrenheit(float temp) {
