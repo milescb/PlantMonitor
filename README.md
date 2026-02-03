@@ -2,7 +2,7 @@
 
 An Arduino library for home temperature and humidity measurements with a DHT sensor and plant moisture level measurements with a capacitive moisture sensor. Measurements are sent via MQTT to any host where MQTT messages can be sent. 
 
-This library is used for obtaining readings on [rain.crabdance.com](https://rain.crabdance.com). 
+This library is used for obtaining readings on [crabdance.milescb.com](https://crabdance.milescb.com). 
 
 ## Requirements
 
